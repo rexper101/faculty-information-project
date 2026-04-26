@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Faculty — Faculty IS{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('faculty.index') }}">Faculty</a></li>
+<li class="breadcrumb-item active">{{ action }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h4 class="page-title">{{ action }} Faculty</h4>
+    <p class="text-muted small mb-0">Fill in the faculty member details</p>
+  </div>
+  <a href="{{ url_for('faculty.index') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="facultyForm">
+  <!-- Personal Details -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-header fw-semibold">
+      <i class="bi bi-person-fill me-2 text-primary"></i>Personal Information
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-2">
+          <div class="profile-upload-area text-center">
+            <div class="profile-preview mb-2" id="previewContainer">
+              {% if faculty and faculty.profile_image %}
+              <img id="profilePreview"
+                   src="{{ url_for('static', filename='../uploads/' + faculty.profile_image) }}"
+                   alt="Profile" class="profile-avatar-img" style="width:80px;height:80px;object-fit:cover;border-radius:50%">
+              {% else %}
+              <div id="profilePlaceholder" class="profile-avatar-placeholder" style="width:80px;height:80px;font-size:1.5rem;margin:auto">
+                <i class="bi bi-person-fill"></i>
+              </div>
+              {% endif %}
+            </div>
+            <label for="profile_image" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-camera-fill me-1"></i>Photo
+            </label>
+            <input type="file" id="profile_image" name="profile_image" class="d-none"
+                   accept="image/*" onchange="previewImage(this)">
+          </div>
+        </div>
+        <div class="col-12 col-md-10">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label required">Employee Code</label>
+              <input type="text" name="employee_code" class="form-control"
+                     value="{{ faculty.employee_code if faculty else '' }}"
+                     placeholder="EMP001" required>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label required">First Name</label>
+              <input type="text" name="first_name" class="form-control"
+                     value="{{ faculty.first_name if faculty else '' }}" required>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label required">Last Name</label>
+              <input type="text" name="last_name" class="form-control"
+                     value="{{ faculty.last_name if faculty else '' }}" required>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Gender</label>
+              <select name="gender" class="form-select">
+                <option value="">— Select —</option>
+                {% for g in ['Male','Female','Other'] %}
+                <option value="{{ g }}" {% if faculty and faculty.gender == g %}selected{% endif %}>{{ g }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Date of Birth</label>
+              <input type="date" name="date_of_birth" class="form-control"
+                     value="{{ faculty.date_of_birth if faculty else '' }}">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control"
+                     value="{{ faculty.email if faculty else '' }}" placeholder="faculty@institute.edu">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Mobile Number</label>
+              <input type="tel" name="mobile_number" class="form-control"
+                     value="{{ faculty.mobile_number if faculty else '' }}" placeholder="+91 XXXXX XXXXX">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Professional Details -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-header fw-semibold">
+      <i class="bi bi-briefcase-fill me-2 text-success"></i>Professional Details
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Designation</label>
+          <input type="text" name="designation" class="form-control"
+                 value="{{ faculty.designation if faculty else '' }}" placeholder="Assistant Professor">
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Department</label>
+          <select name="department_id" class="form-select">
+            <option value="">— Select Department —</option>
+            {% for dept in departments %}
+            <option value="{{ dept.department_id }}"
+              {% if faculty and faculty.department_id == dept.department_id %}selected{% endif %}>
+              {{ dept.department_name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Employment Type</label>
+          <select name="employment_type" class="form-select">
+            {% for et in ['Full-Time','Part-Time','Contract','Visiting'] %}
+            <option value="{{ et }}" {% if faculty and faculty.employment_type == et %}selected{% endif %}>{{ et }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Joining Date</label>
+          <input type="date" name="joining_date" class="form-control"
+                 value="{{ faculty.joining_date if faculty else '' }}">
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="Active" {% if not faculty or faculty.status == 'Active' %}selected{% endif %}>Active</option>
+            <option value="Inactive" {% if faculty and faculty.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Address -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold">
+      <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Address Details
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Address Line 1</label>
+          <input type="text" name="address_line1" class="form-control"
+                 value="{{ faculty.address_line1 if faculty else '' }}">
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Address Line 2</label>
+          <input type="text" name="address_line2" class="form-control"
+                 value="{{ faculty.address_line2 if faculty else '' }}">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">City</label>
+          <input type="text" name="city" class="form-control"
+                 value="{{ faculty.city if faculty else '' }}">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">State</label>
+          <input type="text" name="state" class="form-control"
+                 value="{{ faculty.state if faculty else '' }}">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Pincode</label>
+          <input type="text" name="pincode" class="form-control" maxlength="10"
+                 value="{{ faculty.pincode if faculty else '' }}">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Country</label>
+          <input type="text" name="country" class="form-control"
+                 value="{{ faculty.country if faculty else 'India' }}">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 justify-content-end">
+    <a href="{{ url_for('faculty.index') }}" class="btn btn-outline-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary px-4">
+      <i class="bi bi-{{ 'plus-lg' if action == 'Add' else 'check-lg' }} me-1"></i>
+      {{ action }} Faculty
+    </button>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const placeholder = document.getElementById('profilePlaceholder');
+      let img = document.getElementById('profilePreview');
+      if (!img) {
+        img = document.createElement('img');
+        img.id = 'profilePreview';
+        img.style = 'width:80px;height:80px;object-fit:cover;border-radius:50%';
+        img.alt = 'Preview';
+      }
+      img.src = e.target.result;
+      const container = document.getElementById('previewContainer');
+      if (placeholder) placeholder.replaceWith(img);
+      else container.querySelector('img').src = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+{% endblock %}

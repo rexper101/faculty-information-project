@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Documents — {{ faculty.full_name }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('faculty.index') }}">Faculty</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('faculty.view', faculty_id=faculty.faculty_id) }}">{{ faculty.full_name }}</a></li>
+<li class="breadcrumb-item active">Documents</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h4 class="page-title">Documents</h4>
+    <p class="text-muted small mb-0">{{ faculty.full_name }} — {{ documents|length }} file(s) uploaded</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
+      <i class="bi bi-upload me-1"></i>Upload Document
+    </button>
+    <a href="{{ url_for('faculty.view', faculty_id=faculty.faculty_id) }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+  </div>
+</div>
+
+<!-- Document Cards -->
+{% if documents %}
+<div class="row g-3 mb-3">
+  {% for doc in documents %}
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="card shadow-sm doc-card h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-start gap-3">
+          <div class="doc-icon">
+            {% set ext = doc.file_path.rsplit('.', 1)[-1].lower() if '.' in doc.file_path else 'file' %}
+            {% if ext == 'pdf' %}
+              <i class="bi bi-file-pdf-fill text-danger fs-2"></i>
+            {% elif ext in ['jpg', 'jpeg', 'png', 'gif'] %}
+              <i class="bi bi-file-image-fill text-success fs-2"></i>
+            {% elif ext in ['doc', 'docx'] %}
+              <i class="bi bi-file-word-fill text-primary fs-2"></i>
+            {% else %}
+              <i class="bi bi-file-earmark-fill text-secondary fs-2"></i>
+            {% endif %}
+          </div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="fw-semibold text-truncate" title="{{ doc.document_name }}">
+              {{ doc.document_name }}
+            </div>
+            <div class="text-muted small">
+              <i class="bi bi-calendar3 me-1"></i>
+              {{ doc.upload_date.strftime('%d %b %Y, %I:%M %p') if doc.upload_date else '—' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer d-flex gap-2 py-2">
+        <a href="{{ url_for('documents.download', doc_id=doc.document_id) }}"
+           class="btn btn-sm btn-outline-primary flex-grow-1">
+          <i class="bi bi-download me-1"></i>Download
+        </a>
+        <form method="POST" action="{{ url_for('documents.delete', doc_id=doc.document_id) }}"
+              onsubmit="return confirm('Delete this document?')">
+          <button class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card shadow-sm">
+  <div class="card-body text-center text-muted py-5">
+    <i class="bi bi-folder-x fs-2 d-block mb-2"></i>
+    No documents uploaded yet.
+    <button class="btn btn-sm btn-primary mt-2 d-block mx-auto"
+            data-bs-toggle="modal" data-bs-target="#uploadModal">
+      Upload First Document
+    </button>
+  </div>
+</div>
+{% endif %}
+
+<!-- Allowed file types note -->
+<p class="text-muted small mt-2">
+  <i class="bi bi-info-circle me-1"></i>
+  Allowed types: PDF, PNG, JPG, JPEG, GIF, DOC, DOCX, TXT — Max size: 16 MB
+</p>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ url_for('documents.upload', faculty_id=faculty.faculty_id) }}"
+          enctype="multipart/form-data" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-upload me-2"></i>Upload Document</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Document Name / Label</label>
+          <input type="text" name="document_name" class="form-control"
+                 placeholder="e.g. Resume, Aadhar Card, Degree Certificate">
+          <div class="form-text">Leave blank to use filename</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label required">File</label>
+          <div class="file-drop-zone" id="dropZone">
+            <i class="bi bi-cloud-upload fs-2 d-block mb-2 text-primary"></i>
+            <div class="fw-medium">Drag & drop or click to browse</div>
+            <div class="text-muted small mt-1" id="fileNameDisplay">No file selected</div>
+            <input type="file" name="file" id="fileInput" class="file-drop-input"
+                   accept=".pdf,.png,.jpg,.jpeg,.gif,.doc,.docx,.txt" required>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const dropZone  = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  document.getElementById('fileNameDisplay').textContent =
+    fileInput.files[0] ? fileInput.files[0].name : 'No file selected';
+});
+
+['dragover', 'dragleave', 'drop'].forEach(evt => {
+  dropZone.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.classList.toggle('dragover', evt === 'dragover');
+    if (evt === 'drop') {
+      fileInput.files = e.dataTransfer.files;
+      document.getElementById('fileNameDisplay').textContent =
+        e.dataTransfer.files[0]?.name || 'No file selected';
+    }
+  });
+});
+</script>
+{% endblock %}

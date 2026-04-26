@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% block title %}Performance Reviews — Faculty IS{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Performance</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h4 class="page-title">Performance Reviews</h4>
+    <p class="text-muted small mb-0">Yearly faculty performance ratings</p>
+  </div>
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+    <i class="bi bi-plus-lg me-1"></i>Add Review
+  </button>
+</div>
+
+<!-- Average performance cards -->
+{% if avg_data %}
+<div class="row g-3 mb-4">
+  {% for first, last, avg in avg_data[:4] %}
+  <div class="col-6 col-lg-3">
+    <div class="card shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="fw-bold">{{ first }} {{ last }}</div>
+        <div class="display-6 fw-bold text-{{ 'success' if avg >= 4 else ('warning' if avg >= 3 else 'danger') }} my-1">
+          {{ "%.1f"|format(avg) }}
+        </div>
+        <div class="progress" style="height:6px">
+          <div class="progress-bar bg-{{ 'success' if avg >= 4 else ('warning' if avg >= 3 else 'danger') }}"
+               style="width:{{ (avg / 5 * 100)|int }}%"></div>
+        </div>
+        <div class="text-muted small mt-1">avg rating / 5</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Reviews table -->
+<div class="card shadow-sm">
+  <div class="card-header fw-semibold">All Reviews</div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr><th>#</th><th>Faculty</th><th>Year</th><th>Rating</th><th>Remarks</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for rev in reviews %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>
+              <a href="{{ url_for('faculty.view', faculty_id=rev.faculty_id) }}" class="text-decoration-none">
+                <strong>{{ rev.faculty.full_name }}</strong>
+              </a>
+            </td>
+            <td>{{ rev.review_year }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:6px;max-width:80px">
+                  <div class="progress-bar bg-{{ 'success' if rev.rating >= 4 else ('warning' if rev.rating >= 3 else 'danger') }}"
+                       style="width:{{ (rev.rating / 5 * 100)|int }}%"></div>
+                </div>
+                <span class="fw-semibold small">{{ rev.rating }}/5</span>
+                {% for i in range(5) %}
+                  <i class="bi bi-star{{ '-fill' if i < rev.rating|int else '' }} text-warning" style="font-size:.75rem"></i>
+                {% endfor %}
+              </div>
+            </td>
+            <td><span class="text-muted small">{{ rev.remarks or '—' }}</span></td>
+            <td>
+              <div class="d-flex gap-1">
+                <button class="btn btn-xs btn-outline-primary"
+                        onclick="openEdit({{ rev.review_id }}, {{ rev.faculty_id }},
+                          {{ rev.review_year }}, {{ rev.rating }},
+                          `{{ rev.remarks or '' }}`)">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+                <form method="POST" action="{{ url_for('performance.delete', rev_id=rev.review_id) }}"
+                      onsubmit="return confirm('Delete this review?')">
+                  <button class="btn btn-xs btn-outline-danger"><i class="bi bi-trash-fill"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center text-muted py-4">
+            <i class="bi bi-star fs-3 d-block mb-2"></i>No reviews added yet.
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ url_for('performance.add') }}" class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add Performance Review</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Faculty Member</label>
+          <select name="faculty_id" class="form-select" required>
+            <option value="">— Select Faculty —</option>
+            {% for fac in faculty_list %}
+            <option value="{{ fac.faculty_id }}">{{ fac.full_name }} ({{ fac.employee_code }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label">Review Year</label>
+            <input type="number" name="review_year" class="form-control"
+                   min="2000" max="2099" value="{{ 2024 }}" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Rating (0–5)</label>
+            <input type="number" name="rating" class="form-control"
+                   step="0.1" min="0" max="5" required>
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="form-label">Remarks</label>
+          <textarea name="remarks" class="form-control" rows="3"
+                    placeholder="Performance notes…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Review</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" id="editForm" class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit Review</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Faculty Member</label>
+          <select name="faculty_id" id="editFaculty" class="form-select">
+            {% for fac in faculty_list %}
+            <option value="{{ fac.faculty_id }}">{{ fac.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label">Review Year</label>
+            <input type="number" name="review_year" id="editYear" class="form-control" min="2000" max="2099">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Rating (0–5)</label>
+            <input type="number" name="rating" id="editRating" class="form-control" step="0.1" min="0" max="5">
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="form-label">Remarks</label>
+          <textarea name="remarks" id="editRemarks" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openEdit(id, facId, year, rating, remarks) {
+  document.getElementById('editForm').action    = `/performance/edit/${id}`;
+  document.getElementById('editFaculty').value  = facId;
+  document.getElementById('editYear').value     = year;
+  document.getElementById('editRating').value   = rating;
+  document.getElementById('editRemarks').value  = remarks;
+  new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+</script>
+{% endblock %}

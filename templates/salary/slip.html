@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Salary Slip — {{ faculty.full_name }}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    @media print { .no-print { display: none !important; } body { margin: 0; } }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+    .slip { max-width: 720px; margin: 30px auto; background: #fff;
+            border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+    .slip-header { background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                   color: white; padding: 28px 32px; }
+    .slip-body   { padding: 28px 32px; }
+    .divider     { height: 1px; background: #e5e7eb; margin: 20px 0; }
+    .salary-row  { display: flex; justify-content: space-between; padding: 8px 0;
+                   border-bottom: 1px dashed #e5e7eb; }
+    .total-row   { display: flex; justify-content: space-between; padding: 12px 16px;
+                   background: #f0fdf4; border-radius: 8px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="slip">
+  <div class="slip-header">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h4 class="mb-0 fw-bold">SALARY SLIP</h4>
+        <div class="opacity-75 mt-1">{{ salary.salary_month or 'N/A' }}</div>
+      </div>
+      <div class="text-end">
+        <div class="fw-bold fs-5">FacultyIS</div>
+        <div class="opacity-75 small">Faculty Information System</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slip-body">
+    <!-- Employee info -->
+    <div class="row g-3 mb-3">
+      <div class="col-6">
+        <table class="table table-sm table-borderless mb-0">
+          <tr><td class="text-muted small">Employee Name</td><td><strong>{{ faculty.full_name }}</strong></td></tr>
+          <tr><td class="text-muted small">Employee Code</td><td>{{ faculty.employee_code }}</td></tr>
+          <tr><td class="text-muted small">Designation</td><td>{{ faculty.designation or '—' }}</td></tr>
+        </table>
+      </div>
+      <div class="col-6">
+        <table class="table table-sm table-borderless mb-0">
+          <tr><td class="text-muted small">Department</td>
+              <td>{{ faculty.department.department_name if faculty.department else '—' }}</td></tr>
+          <tr><td class="text-muted small">Payment Date</td><td>{{ salary.payment_date or '—' }}</td></tr>
+          <tr><td class="text-muted small">Status</td>
+              <td><span class="badge bg-{{ 'success' if salary.salary_status == 'Paid' else 'warning text-dark' }}">
+                {{ salary.salary_status }}</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Earnings & Deductions -->
+    <div class="row g-4">
+      <div class="col-6">
+        <h6 class="fw-bold text-success mb-3"><i class="bi bi-plus-circle-fill me-1"></i>Earnings</h6>
+        <div class="salary-row">
+          <span>Basic Salary</span>
+          <strong>₹{{ "{:,.2f}".format(salary.basic_salary or 0) }}</strong>
+        </div>
+        <div class="salary-row">
+          <span>Allowances</span>
+          <strong>₹{{ "{:,.2f}".format(salary.allowances or 0) }}</strong>
+        </div>
+        <div class="salary-row fw-semibold">
+          <span>Gross Earnings</span>
+          <span class="text-success">₹{{ "{:,.2f}".format((salary.basic_salary or 0) + (salary.allowances or 0)) }}</span>
+        </div>
+      </div>
+      <div class="col-6">
+        <h6 class="fw-bold text-danger mb-3"><i class="bi bi-dash-circle-fill me-1"></i>Deductions</h6>
+        <div class="salary-row">
+          <span>Total Deductions</span>
+          <strong class="text-danger">₹{{ "{:,.2f}".format(salary.deductions or 0) }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Net Salary -->
+    <div class="total-row">
+      <span class="fw-bold fs-5">Net Salary</span>
+      <span class="fw-bold fs-4 text-success">₹{{ "{:,.2f}".format(salary.net_salary or 0) }}</span>
+    </div>
+
+    <div class="divider"></div>
+    <p class="text-muted small text-center mb-0">
+      This is a computer-generated salary slip. No signature required.
+    </p>
+  </div>
+</div>
+
+<!-- Print button -->
+<div class="text-center my-3 no-print">
+  <button onclick="window.print()" class="btn btn-primary me-2">
+    <i class="bi bi-printer-fill me-1"></i>Print Slip
+  </button>
+  <button onclick="window.close()" class="btn btn-outline-secondary">Close</button>
+</div>
+
+</body>
+</html>

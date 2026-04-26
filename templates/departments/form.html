@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Department — Faculty IS{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('departments.index') }}">Departments</a></li>
+<li class="breadcrumb-item active">{{ action }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h4 class="page-title">{{ action }} Department</h4>
+    <p class="text-muted small mb-0">
+      {% if action == 'Add' %}Create a new department{% else %}Update department information{% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('departments.index') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-building-fill me-2 text-primary"></i>Department Details
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label required">Department Name</label>
+            <input type="text" name="department_name" class="form-control"
+                   value="{{ dept.department_name if dept else '' }}"
+                   placeholder="e.g. Computer Science" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">Department Code</label>
+            <input type="text" name="department_code" class="form-control"
+                   value="{{ dept.department_code if dept else '' }}"
+                   placeholder="e.g. CS" maxlength="20"
+                   style="text-transform:uppercase" required>
+            <div class="form-text">Unique short code for the department</div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Head of Department (HOD)</label>
+            <input type="text" name="hod_name" class="form-control"
+                   value="{{ dept.hod_name if dept else '' }}"
+                   placeholder="Full name of the HOD">
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+              <i class="bi bi-{{ 'plus-lg' if action == 'Add' else 'check-lg' }} me-1"></i>
+              {{ action }} Department
+            </button>
+            <a href="{{ url_for('departments.index') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
