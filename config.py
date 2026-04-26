@@ -25,4 +25,4 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024   # 16 MB
     ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'}
 
-    ITEMS_PER_PAGE = 10
+    ITEMS_PER_PAGE = 
