@@ -1,28 +1,24 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from datetime import timedelta
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'faculty-system-secret-key-change-in-prod'
-    
-    DB_HOST     = os.environ.get('DB_HOST', 'localhost')
-    DB_USER     = os.environ.get('DB_USER', 'root')
-    DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
-    DB_NAME     = os.environ.get('DB_NAME', 'faculty_db')
-    DB_PORT     = os.environ.get('DB_PORT', '3306')
+    # ── Security ───────────────────────────────────────────────────────
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
 
-    SQLALCHEMY_DATABASE_URI = (
-        f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    )
+    # ── Database ───────────────────────────────────────────────────────
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:Aniket%402004@localhost:3306/faculty_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_recycle': 280,
+        'pool_recycle': 300,
         'pool_pre_ping': True,
     }
 
+    # ── File Uploads ───────────────────────────────────────────────────
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024   # 16 MB
-    ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'}
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB limit
+    ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx'}
 
-    ITEMS_PER_PAGE = 10
+    # ── Session ────────────────────────────────────────────────────────
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=2)
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'

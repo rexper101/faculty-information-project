@@ -1,24 +1,18 @@
-from app import db, login_manager
+from extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return AdminUser.query.get(int(user_id))
 
 
 # ── Authentication ────────────────────────────────────────────────────────────
 class AdminUser(UserMixin, db.Model):
     __tablename__ = 'admin_users'
 
-    admin_id   = db.Column(db.Integer, primary_key=True)
-    username   = db.Column(db.String(50), unique=True, nullable=False)
+    admin_id      = db.Column(db.Integer, primary_key=True)
+    username      = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Flask-Login uses .id by default
     @property
     def id(self):
         return self.admin_id
@@ -73,14 +67,14 @@ class Faculty(db.Model):
     status          = db.Column(db.Enum('Active', 'Inactive'), default='Active')
     profile_image   = db.Column(db.String(255))
 
-    qualifications    = db.relationship('Qualification',    backref='faculty', lazy=True, cascade='all, delete-orphan')
-    experiences       = db.relationship('Experience',       backref='faculty', lazy=True, cascade='all, delete-orphan')
-    documents         = db.relationship('Document',         backref='faculty', lazy=True, cascade='all, delete-orphan')
-    publications      = db.relationship('ResearchPublication', backref='faculty', lazy=True, cascade='all, delete-orphan')
-    performance_reviews = db.relationship('PerformanceReview', backref='faculty', lazy=True, cascade='all, delete-orphan')
-    salaries          = db.relationship('Salary',           backref='faculty', lazy=True, cascade='all, delete-orphan')
-    attendances       = db.relationship('Attendance',       backref='faculty', lazy=True, cascade='all, delete-orphan')
-    leave_requests    = db.relationship('LeaveRequest',     backref='faculty', lazy=True, cascade='all, delete-orphan')
+    qualifications      = db.relationship('Qualification',       backref='faculty', lazy=True, cascade='all, delete-orphan')
+    experiences         = db.relationship('Experience',          backref='faculty', lazy=True, cascade='all, delete-orphan')
+    documents           = db.relationship('Document',            backref='faculty', lazy=True, cascade='all, delete-orphan')
+    publications        = db.relationship('ResearchPublication',  backref='faculty', lazy=True, cascade='all, delete-orphan')
+    performance_reviews = db.relationship('PerformanceReview',   backref='faculty', lazy=True, cascade='all, delete-orphan')
+    salaries            = db.relationship('Salary',              backref='faculty', lazy=True, cascade='all, delete-orphan')
+    attendances         = db.relationship('Attendance',          backref='faculty', lazy=True, cascade='all, delete-orphan')
+    leave_requests      = db.relationship('LeaveRequest',        backref='faculty', lazy=True, cascade='all, delete-orphan')
 
     @property
     def full_name(self):
@@ -157,7 +151,6 @@ class Salary(db.Model):
     basic_salary  = db.Column(db.Numeric(10, 2))
     allowances    = db.Column(db.Numeric(10, 2), default=0)
     deductions    = db.Column(db.Numeric(10, 2), default=0)
-    # net_salary is GENERATED in MySQL; keep it read-only here
     net_salary    = db.Column(db.Numeric(10, 2))
     payment_date  = db.Column(db.Date)
     salary_month  = db.Column(db.String(20))

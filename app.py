@@ -1,11 +1,7 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from extensions import db, login_manager
 from config import Config
 import os
-
-db = SQLAlchemy()
-login_manager = LoginManager()
 
 
 def create_app():
@@ -20,6 +16,13 @@ def create_app():
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'warning'
 
+    # ── User Loader ────────────────────────────────────────────────────
+    @login_manager.user_loader
+    def load_user(user_id):
+        from models.models import AdminUser
+        return AdminUser.query.get(int(user_id))
+
+    # ── Blueprints ─────────────────────────────────────────────────────
     from routes.auth import auth_bp
     from routes.dashboard import dashboard_bp
     from routes.departments import departments_bp
@@ -46,7 +49,7 @@ def create_app():
     app.register_blueprint(attendance_bp)
     app.register_blueprint(leaves_bp)
 
-    # ── Context processors ────────────────────────────────────────────
+    # ── Context processors ─────────────────────────────────────────────
     from datetime import datetime as _dt
 
     @app.context_processor
