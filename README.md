@@ -129,3 +129,7 @@ faculty_system/
 ## 📄 License
 
 MIT — free for personal and commercial use.
+
+
+
+print hello world
