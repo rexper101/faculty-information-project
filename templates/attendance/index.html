@@ -128,41 +128,6 @@
             {% endfor %}
           </select>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Date</label>
-          <input type="date" name="attendance_date" class="form-control"
-                 value="{{ today }}" required>
-        </div>
-        <div class="row g-2">
-          <div class="col-6">
-            <label class="form-label">Check In</label>
-            <input type="time" name="check_in_time" class="form-control">
-          </div>
-          <div class="col-6">
-            <label class="form-label">Check Out</label>
-            <input type="time" name="check_out_time" class="form-control">
-          </div>
-        </div>
-        <div class="mt-3">
-          <label class="form-label">Status</label>
-          <div class="d-flex gap-3">
-            {% for s in ['Present', 'Absent', 'Leave'] %}
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="status" value="{{ s }}"
-                     id="status{{ s }}" {% if s == 'Present' %}checked{% endif %}>
-              <label class="form-check-label" for="status{{ s }}">{{ s }}</label>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary">Mark</button>
-      </div>
-    </form>
-  </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
