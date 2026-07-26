@@ -112,22 +112,7 @@
   </div>
 </div>
 
-<!-- Mark Modal -->
-<div class="modal fade" id="markModal" tabindex="-1">
-  <div class="modal-dialog">
-    <form method="POST" action="{{ url_for('attendance.mark') }}" class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Mark Attendance</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Faculty</label>
-          <select name="faculty_id" class="form-select" required>
-            <option value="">— Select Faculty —</option>
-            {% for fac in faculty_list %}
-            <option value="{{ fac.faculty_id }}">{{ fac.full_name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+
 {% endblock %}
 
 {% block extra_js %}
