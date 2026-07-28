@@ -45,14 +45,16 @@
             <td>
               <div class="d-flex gap-1">
                 <button class="btn btn-xs btn-outline-primary"
-                        onclick="openEdit({{ exp.experience_id }},
-                          '{{ exp.organization_name or '' }}',
-                          '{{ exp.designation or '' }}',
-                          '{{ exp.start_date or '' }}',
-                          '{{ exp.end_date or '' }}',
-                          '{{ exp.years_of_experience or '' }}')">
-                  <i class="bi bi-pencil-fill"></i>
-                </button>
+                 onclick='openEdit(
+                     {{ exp.experience_id }},
+                     {{ (exp.organization_name or "")|tojson }},
+                     {{ (exp.designation or "")|tojson }},
+                     {{ (exp.start_date or "")|tojson }},
+        {{ (exp.end_date or "")|tojson }},
+        {{ (exp.years_of_experience or "")|tojson }}
+    )'>
+    <i class="bi bi-pencil-fill"></i>
+</button>
                 <form method="POST" action="{{ url_for('experience.delete', exp_id=exp.experience_id) }}"
                       onsubmit="return confirm('Delete this experience record?')">
                   <button class="btn btn-xs btn-outline-danger"><i class="bi bi-trash-fill"></i></button>
