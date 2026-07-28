@@ -157,31 +157,3 @@ class Salary(db.Model):
     salary_status = db.Column(db.Enum('Pending', 'Paid'), default='Pending')
 
 
-# ── Attendance ────────────────────────────────────────────────────────────────
-class Attendance(db.Model):
-    __tablename__ = 'attendance'
-
-    attendance_id   = db.Column(db.Integer, primary_key=True)
-    faculty_id      = db.Column(db.Integer, db.ForeignKey('faculty.faculty_id'))
-    attendance_date = db.Column(db.Date)
-    check_in_time   = db.Column(db.Time)
-    check_out_time  = db.Column(db.Time)
-    status          = db.Column(db.Enum('Present', 'Absent', 'Leave'), default='Present')
-
-
-# ── Leave Requests ────────────────────────────────────────────────────────────
-class LeaveRequest(db.Model):
-    __tablename__ = 'leave_requests'
-
-    leave_id        = db.Column(db.Integer, primary_key=True)
-    faculty_id      = db.Column(db.Integer, db.ForeignKey('faculty.faculty_id'))
-    leave_type      = db.Column(db.String(50))
-    from_date       = db.Column(db.Date)
-    to_date         = db.Column(db.Date)
-    reason          = db.Column(db.Text)
-    approval_status = db.Column(db.Enum('Pending', 'Approved', 'Rejected'), default='Pending')
-    reviewed_by     = db.Column(db.Integer, db.ForeignKey('admin_users.admin_id'))
-    reviewed_at     = db.Column(db.DateTime)
-    applied_at      = db.Column(db.DateTime, default=datetime.utcnow)
-
-    reviewer = db.relationship('AdminUser', backref='reviewed_leaves')
