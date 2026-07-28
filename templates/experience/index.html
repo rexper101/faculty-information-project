@@ -153,16 +153,3 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-function openEdit(id, org, desig, start, end, years) {
-  document.getElementById('editForm').action = `/experience/edit/${id}`;
-  document.getElementById('editOrg').value   = org;
-  document.getElementById('editDesig').value = desig;
-  document.getElementById('editStart').value = start;
-  document.getElementById('editEnd').value   = end;
-  document.getElementById('editYears').value = years;
-  new bootstrap.Modal(document.getElementById('editModal')).show();
-}
-</script>
-{% endblock %}
